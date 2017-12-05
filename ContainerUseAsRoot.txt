@@ -1,7 +1,7 @@
 $ vim node_exporter-daemonset.yaml
 ##################################
 添加securityContext字样	         #
-提升容器运行用户为Root			 #
+提升容器运行用户为Root		 #
 ##################################
 apiVersion: extensions/v1beta1
 kind: DaemonSet
