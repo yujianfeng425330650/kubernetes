@@ -1,0 +1,64 @@
+$ vim node_exporter-daemonset.yaml
+##################################
+添加securityContext字样	         #
+提升容器运行用户为Root			 #
+##################################
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-exporter-daemonset
+  labels:
+    k8s-monitor: node-exporter-daemon
+    app: node-exporter-daemon
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        app: node-exporter-pod
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+      - name: node-exporter-system
+        image: 10.174.88.200/library/prom/node-exporter:0.15.0-m
+        ports:
+        - containerPort: 9100
+          name: scrape
+          hostPort: 9100
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+          - name: hostproc
+            mountPath: /host/proc
+            readOnly: true
+          - name: hostsys
+            mountPath: /host/sys
+            readOnly: true
+          - name: rootfs
+            mountPath: /rootfs
+            readOnly: true
+        securityContext:
+          privileged: true
+          runAsUser: 0
+      volumes:
+        - name: hostproc
+          hostPath:
+            path: /proc
+        - name: hostsys
+          hostPath:
+            path: /sys
+        - name: rootfs
+          hostPath:
+            path: /
+      hostNetwork: true
+      hostPID: true
+#################################
+$ kubectl create -f node-exporter-daemon.yaml
+$ kubectl logs -f node-exporter-daemonset-xxxx 
+查看有无pemission denied字样
