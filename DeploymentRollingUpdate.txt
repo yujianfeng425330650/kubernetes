@@ -1,0 +1,43 @@
+$ vim nginx-deployment.yaml
+##################################
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: default
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+      nodeSelector:
+        dada: "nginx"
+##################################
+修改nginx镜像为latest版本	 # 
+##################################
+$ kubectl apply -f nginx-deployment.yaml
+$ kubectl get pods
+##################################
+把pod数量扩容到10	 	 # 
+##################################
+$ kubectl scale -f nginx-deployment.yaml --replicas=10
+$ kubectl get pods
