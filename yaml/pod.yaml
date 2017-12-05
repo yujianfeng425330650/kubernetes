@@ -1,0 +1,80 @@
+apiVersion: v1                  #必须，kubernetes pod资源api版本号，例如v1
+kind: Pod                       #必须，资源类型pod
+metadata:                       #必须，元数据
+  name: string                    #必须，pod的名称
+  namespace: string               #必须，pod所属的命令空间，默认为default
+  labels:                         #可选，自定义标签列表
+    - name: string                  #标签名称
+  annotations:                    #可选，自定义标签注解
+    - name: string                  #标签注解(详细内容)
+spec:                           #必须，pod中容器的详细定义
+  containers:                     #必须，pod中容器的列表
+  - name: string                    #必须，pod中容器的名称
+    image: string                   #必须，pod中容器的镜像名称
+    imagePullPolicy: {Always | Never | IfNotPresent}    #可选，获取镜像的策略，默认Always，Always：每次都尝试重新下载镜像，IfNotPresent：如果本地没镜像就下载，Never：仅使用本地镜像
+    command: [string]               #可选，容器的启动命令列表，不指定，使用镜像默认的启动命令
+    args: [string]                  #可选，容器的启动命令参数列表
+    workingDir: string              #可选，容器的工作目录
+    volumeMounts:                   #可选，挂载到容器内部的存储卷配置
+    - name: string                    #引用pod定义的共享存储卷的名称，需使用volumes[]部分定义的共享存储卷名称
+      mountPath: string               #存储卷在容器内Mount的绝对路径，应少于512字符
+      readOnly: boolean               #是否为只读模式，默认为读写模式
+    ports:                          #可选，容器需要暴露的端口列表
+    - name: string                    #容器暴露的端口名称
+      containerPort: int              #容器需要监听的端口号
+      hostPort: int                   #容器所在主机需要监听的端口号，默认与containerPort相同，设置hostPort时，同一台宿主机将无法启动该容器的第2份副本
+      protocol: string                #端口协议，支持TCP和UDP，默认值为TCP
+    env:                            #可选，容器运行前需设置的环境变量列表
+    - name: string                    #容器环境变量的名称
+      value: string                   #容器环境变量的值
+    resources:                      #可选，容器资源限制和资源请求的设置
+      limits:                         #资源限制设置
+        cpu: string                     #CPU限制，单位为core数，将用于docker run --cpu-shares参数
+        memory: string                  #内存限制，单位可以为MiB/GiB等，将用于docker run --memory参数
+      requests:                       #请求资源限制
+        cpu: string                     #CPU请求，单位为core数，容器启动的初始可用CPU核心数
+        memory: string                  #内存请求，单位可以为MiB、GiB等，容器启动的初始可用内存
+    livenessProbe:                  #可选，对pod内各容器健康检查的设置，当探测无响应几次之后，系统将自动重启该容器。可设置的方法：exec、httpGet、tcpSocket，一个容器仅需设置一种方法
+      exec:                           #pod内各容器的检查方法：exec方式
+        command: [string]               #exec方式需要指定的命令或脚本
+      httpGet:                        #对pod内各容器健康检查的设置，httpGet方式，需要指定path、port
+        path: string                    #指定httpGet方法需要的路径
+        port: number                    #指定httpGet方法需要的端口号
+        host: string                    #指定httpGet方法需要的主机
+        scheme: string                  #指定httpGet方法需要的协议，http/https
+        httpHeaders:                    #指定httpGet方法需要的请求头
+        - name: string                    #请求头名称
+          value: string                   #请求头名称对应返回值
+      tcpSocket:                      #对pod内各容器健康检查的设置，tcpSocket方式
+        port: number                    #指定tcpSocket检查方式需要的端口
+      initialDelaySeconds: 0          #容器启动完成后进行首次探测的时间，单位为s
+      timeoutSeconds: 0               #对容器健康检查的冉策等待响应的超时时间设置，单位为s，默认值为1s，超过该超时时间设置，将认为该容器不健康，将重启该容器
+      periodSeconds: 0                #对容器健康检查的定期探测时间设置，单位为s，默认为10s探测一次
+      successThreshold: 0             #检测失败后认为成功的最小连续成功次数，默认为1
+      failureThreshold: 0             #检测失败次数设置并放弃重启pod
+    securityContext:                #可选，容器的安全上下文设置
+      privileged: false               #是否开启容器的特权模式，默认false
+  restartPolicy: [Always | Never | OnFailure]
+          #可选，pod的重启策略，默认为Always
+          #Always：Pod一旦终止运行，无论容器是如何之中的，kubelete都将重启
+          #OnFailure：Pod以非零退出码，kubelete才会重启
+          #Never：Pod终止后，kubelet将退出码报告给Master，不会再重启该Pod
+  nodeSelector: object            #可选，设置nodeSelector表示将该Pod调度到包含这些label的Node上，以key：value格式指定
+  imagePullSecrets:               #可选，pull镜像时使用的secret名称，以name:secretkey格式指定
+  - name: string
+  hostNetwork: false              #可选，是否使用主机网络模式，默认值为false，如果设置为true，表示容器使用宿主机网络，不在使用docker网桥，该Pod将无法再同一台宿主机上启动第二个副本
+  volumes:                        #可选，该Pod上定义的共享存储卷列表
+  - name: string                    #共享存储卷的名称，在一个pod中每个存储卷定义一个名称，容器定义部分的containers[].voluemMounts[].name将引用该共享存储卷的名称
+    emptyDir: { }                   #类型为empthDir的存储卷，表示与pod通生命周期的一个临时目录，其值为一个空对象
+    hostPath:                       #类型为hostPath的存储卷，表示挂载Pod所在宿主机的目录
+      path: string                    #指定存储卷类型为hostPath在宿主机上的挂载路径
+    secret:                         #类型为secret的存储卷，表示挂载集群预定义的secret对象到容器内部
+      secretName: string
+      items:
+      - key: string
+        path: string
+    configMap:                      #定义为configMap的存储卷，表示挂载集群预定义的configMap对象到容器内部
+      name: string                    #configMap资源名称
+      items:
+      - key: string                     #configMap中的key值
+        path: string                    #挂载到容器中的文件名
