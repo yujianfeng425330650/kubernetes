@@ -1,7 +1,7 @@
 $ kubectl label nodes centos-k8s-master-elkserver dada=nginx
 $ kubectl label nodes ubuntu-k8s-node-wordapp dada=nginx
 $ kubectl label nodes ubuntu-k8s-node-worddb dada=nginx
-# kubectl get nodes --show-labels
+$ kubectl get nodes --show-labels
 NAME                          STATUS    AGE       VERSION   LABELS
 centos-k8s-master-elkserver   Ready     11d       v1.7.10   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,dada=nginx,kubernetes.io/hostname=centos-k8s-master-elkserver
 centos-k8s-node-app1          Ready     7d        v1.7.10   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=centos-k8s-node-app1
